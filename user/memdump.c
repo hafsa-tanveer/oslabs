@@ -57,9 +57,57 @@ main(int argc, char *argv[])
   exit(0);
 }
 
-void
+
+  void
 memdump(char *fmt, char *data)
 {
-  // Your code here.
-
+  for (int i = 0; fmt[i]; i++) {
+    switch (fmt[i]) {
+    case 'i': { 
+      int val = *(int*)data;
+      printf("%d\n", val);
+      data += sizeof(int);
+      break;
+    }
+    case 'h': { 
+      short val = *(short*)data;
+      printf("%d\n", val);
+      data += sizeof(short);
+      break;
+    }
+    case 'c': { 
+      char val = *(char*)data;
+      printf("%c\n", val);
+      data += sizeof(char);
+      break;
+    }
+    case 'p': { 
+      char *ptr = *(char**)data;
+      printf("%p\n", ptr);
+      data += sizeof(char*);
+      break;
+    }
+    case 's': { 
+      char *ptr = *(char**)data;
+      if (ptr)
+        printf("%s\n", ptr);
+      else
+        printf("(null)\n");
+      data += sizeof(char*);
+      break;
+    }
+    case 'S': { 
+      char *str = (char*)data;
+      printf("%s\n", str);
+      data += strlen(str) + 1;
+      break;
+    }
+    default:
+      printf("Unknown format %c\n", fmt[i]);
+      break;
+    }
+  }
 }
+
+
+
