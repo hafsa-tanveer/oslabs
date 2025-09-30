@@ -1,41 +1,70 @@
 #include "kernel/types.h"
-#include "user/user.h" 
+#include "kernel/stat.h"
+#include "user/user.h"
+#include "kernel/fcntl.h"
 
-int main(int argc, char *argv[]) {
-  char buffer[512];
-  int n;
+#define BUF_SIZE 512 
+//programs runs slow with a smaller buffer size, crashes w a bigger one
 
-  while ((n = read(0, buffer, sizeof(buffer))) > 0) {
-    int i = 0;
-    while (i < n) {
-      
-      while (i < n && (buffer[i] < '0' || buffer[i] > '9')) {
-        i++;
-      }
+int is_sep(char c) {
+  char *seps = " -\r\t\n./,";
+  for (int i = 0; seps[i]; i++) {
+    if (c == seps[i])
+      return 1; //checks for separators
+  }
+  return 0;
+}
 
-      
-      if (i >= n) {
-        break;
-      }
+void sixfive(int fd) {
+  char buf[BUF_SIZE];
+  int n, i;
+  int num = 0;
+  int has_num = 0;
 
-      char num_str[64];
-      int j = 0;
-      while (i < n && buffer[i] >= '0' && buffer[i] <= '9') {
-        if (j < sizeof(num_str) - 1) {
-          num_str[j++] = buffer[i];
+  while ((n = read(fd, buf, sizeof(buf))) > 0) {
+    for (i = 0; i < n; i++) {
+      if (buf[i] >= '0' && buf[i] <= '9') {
+        num = num * 10 + (buf[i] - '0');
+        has_num = 1;   //checks number
+      } else if (is_sep(buf[i])) {
+        if (has_num) {
+          if (num % 5 == 0 || num % 6 == 0) //checks multiple
+            printf("%d\n", num);
+          num = 0;
+          has_num = 0;
         }
-        i++;
-      }
-      num_str[j] = '\0';
-
-      if (j > 0) {
-        int val = atoi(num_str);
-        if (val % 5 == 0 || val % 6 == 0) {
-          printf("%d\n", val);
-        }
+      } else {
+        
+        num = 0;
+        has_num = 0;
       }
     }
   }
 
+  
+  if (has_num && (num % 5 == 0 || num % 6 == 0)) {
+    printf("%d\n", num);
+  }
+}
+
+int main(int argc, char *argv[]) {
+  int fd;
+
+  if (argc <= 1) {
+    fprintf(2, "Usage: sixfive files...\n");
+    exit(1);  //added to read file; didnt work otherwise 
+  }
+
+  for (int i = 1; i < argc; i++) {
+    fd = open(argv[i], O_RDONLY);
+    if (fd < 0) {
+      fprintf(2, "sixfive: cannot open %s\n", argv[i]);
+      exit(1);
+    }
+    sixfive(fd);
+    close(fd);
+  }
+
   exit(0);
 }
+
