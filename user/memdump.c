@@ -57,8 +57,7 @@ main(int argc, char *argv[])
   exit(0);
 }
 
-
-  void
+void
 memdump(char *fmt, char *data)
 {
   for (int i = 0; fmt[i]; i++) {
@@ -69,6 +68,12 @@ memdump(char *fmt, char *data)
       data += sizeof(int);
       break;
     }
+    case 'p': { 
+      uint64 val = *(uint64*)data;
+      printf("%x\n", (uint)val);  
+      data += sizeof(uint64);
+      break;
+    }
     case 'h': { 
       short val = *(short*)data;
       printf("%d\n", val);
@@ -76,38 +81,30 @@ memdump(char *fmt, char *data)
       break;
     }
     case 'c': { 
-      char val = *(char*)data;
+      char val = *data;
       printf("%c\n", val);
       data += sizeof(char);
       break;
     }
-    case 'p': { 
-      char *ptr = *(char**)data;
-      printf("%p\n", ptr);
-      data += sizeof(char*);
-      break;
-    }
     case 's': { 
       char *ptr = *(char**)data;
-      if (ptr)
-        printf("%s\n", ptr);
-      else
+      if (ptr == 0) {
         printf("(null)\n");
+      } else {
+        printf("%s\n", ptr);
+      }
       data += sizeof(char*);
       break;
     }
     case 'S': { 
-      char *str = (char*)data;
-      printf("%s\n", str);
-      data += strlen(str) + 1;
+      printf("%s\n", data);
+      while (*data) data++;
+      data++; 
       break;
     }
     default:
-      printf("Unknown format %c\n", fmt[i]);
+      printf("Unknown format character: %c\n", fmt[i]);
       break;
     }
   }
 }
-
-
-
