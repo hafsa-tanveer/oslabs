@@ -6,6 +6,8 @@
 #include "spinlock.h"
 #include "proc.h"
 #include "vm.h"
+#include "kernel/param.h"
+
 
 uint64
 sys_exit(void)
@@ -104,4 +106,27 @@ sys_uptime(void)
   xticks = ticks;
   release(&tickslock);
   return xticks;
+}
+
+
+
+uint64
+sys_interpose(void)
+{
+  int mask;
+  char path[128];
+  struct proc *p = myproc();
+
+  // Fetch the first argument (the integer mask).
+  // The result is placed in the trapframe's a0 register.
+  argint(0, &mask);
+  
+  // Fetch the second argument (the string path).
+  argstr(1, path, 128);
+  
+  // Now store them in the process's structure.
+  p->syscall_mask = mask;
+  safestrcpy(p->allowed_path, path, 128);
+
+  return 0;
 }

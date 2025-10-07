@@ -434,6 +434,7 @@ sys_chdir(void)
 uint64
 sys_exec(void)
 {
+  printf("DEBUG exec: pid=%d, name=%s, mask=%d\n", myproc()->pid, myproc()->name, myproc()->syscall_mask);
   char path[MAXPATH], *argv[MAXARG];
   int i;
   uint64 uargv, uarg;

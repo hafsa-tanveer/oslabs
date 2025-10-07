@@ -102,6 +102,11 @@ struct proc {
   struct trapframe *trapframe; // data page for trampoline.S
   struct context context;      // swtch() here to run process
   struct file *ofile[NOFILE];  // Open files
+ 
   struct inode *cwd;           // Current directory
   char name[16];               // Process name (debugging)
+  uint syscall_mask;           // Your existing mask
+  char allowed_path[MAXPATH];  // ADD THIS LINE
+
+
 };
